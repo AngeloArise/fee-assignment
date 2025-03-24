@@ -3,9 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>3-Phase Delta Load Inductance Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .calculator {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #34495e;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #eaf2f8;
+            border-radius: 5px;
+            display: none;
+        }
+        .result-item {
+            margin-bottom: 10px;
+        }
+        .result-value {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        .formula {
+            background-color: #f0f7fd;
+            padding: 10px;
+            border-left: 4px solid #3498db;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
-    
+    <div class="calculator">
+        <h1>3-Phase Delta Load Inductance Calculator</h1>
+        
+        <div class="input-group">
+            <label for="lineVoltage">Line Voltage (V):</label>
+            <input type="number" id="lineVoltage" placeholder="Enter line voltage (e.g., 400)">
+        </div>
+        
+        <div class="input-group">
+            <label for="totalPower">Total Active Power (W):</label>
+            <input type="number" id="totalPower" placeholder="Enter total power (e.g., 26000)">
+        </div>
+        
+        <div class="input-group">
+            <label for="powerFactor">Power Factor (lagging):</label>
+            <input type="number" id="powerFactor" step="0.01" min="0" max="1" placeholder="Enter power factor (0-1, e.g., 0.6)">
+        </div>
+        
+        <div class="input-group">
+            <label for="frequency">Frequency (Hz):</label>
+            <input type="number" id="frequency" placeholder="Enter frequency (e.g., 50)">
+        </div>
+        
+        <button onclick="calculateInductance()">Calculate Inductance</button>
+        
+        <div class="formula">
+            <strong>Formulas Used:</strong><br>
+            1. S = P / pf<br>
+            2. I_L = S / (√3 × V_L)<br>
+            3. I_ph = I_L / √3 (for delta)<br>
+            4. Z_ph = V_ph / I_ph<br>
+            5. R = Z_ph × pf<br>
+            6. X_L = Z_ph × sin(θ)<br>
+            7. L = X_L / (2πf)
+        </div>
+        
+        <div id="results" class="results">
+            <h3>Calculation Results</h3>
+            <div class="result-item">
+                Total Apparent Power: <span class="result-value" id="apparentPower"></span> VA
+            </div>
+            <div class="result-item">
+                Line Current: <span class="result-value" id="lineCurrent"></span> A
+            </div>
+            <div class="result-item">
+                Phase Current: <span class="result-value" id="phaseCurrent"></span> A
+            </div>
+            <div class="result-item">
+                Impedance per Phase: <span class="result-value" id="impedance"></span> Ω
+            </div>
+            <div class="result-item">
+                Reactance per Phase: <span class="result-value" id="reactance"></span> Ω
+            </div>
+            <div class="result-item">
+                <strong>Inductance per Branch:</strong> <span class="result-value" id="inductance"></span> H
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateInductance() {
+            // Get input values
+            const V_L = parseFloat(document.getElementById('lineVoltage').value);
+            const P = parseFloat(document.getElementById('totalPower').value);
+            const pf = parseFloat(document.getElementById('powerFactor').value);
+            const f = parseFloat(document.getElementById('frequency').value);
+            
+            // Validate inputs
+            if (isNaN(V_L) || V_L <= 0) {
+                alert("Please enter a valid line voltage");
+                return;
+            }
+            if (isNaN(P) || P <= 0) {
+                alert("Please enter a valid total power");
+                return;
+            }
+            if (isNaN(pf) || pf <= 0 || pf > 1) {
+                alert("Please enter a valid power factor (0-1)");
+                return;
+            }
+            if (isNaN(f) || f <= 0) {
+                alert("Please enter a valid frequency");
+                return;
+            }
+            
+            // Calculations
+            const S = P / pf;
+            const I_L = S / (Math.sqrt(3) * V_L);
+            const I_ph = I_L / Math.sqrt(3);
+            const Z_ph = V_L / I_ph;
+            const X_L = Z_ph * Math.sqrt(1 - Math.pow(pf, 2));
+            const L = X_L / (2 * Math.PI * f);
+            
+            // Display results
+            document.getElementById('apparentPower').textContent = S.toFixed(2);
+            document.getElementById('lineCurrent').textContent = I_L.toFixed(2);
+            document.getElementById('phaseCurrent').textContent = I_ph.toFixed(2);
+            document.getElementById('impedance').textContent = Z_ph.toFixed(2);
+            document.getElementById('reactance').textContent = X_L.toFixed(2);
+            document.getElementById('inductance').textContent = L.toFixed(6);
+            
+            // Show results
+            document.getElementById('results').style.display = 'block';
+        }
+    </script>
 </body>
 </html>
