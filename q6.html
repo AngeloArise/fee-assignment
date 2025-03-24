@@ -3,9 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Delta Connection Phase Angle Calculator</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; }
+        .calculator { background: #f9f9f9; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        input { width: 100%; padding: 8px; margin: 5px 0 15px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #007BFF; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; }
+        .result { font-weight: bold; color: #d9534f; margin-top: 10px; }
+    </style>
 </head>
 <body>
-    
+    <div class="calculator">
+        <h2>Delta Connection: Phase Angle of \( I_R \)</h2>
+        <label for="pf">Power Factor (lagging):</label>
+        <input type="number" id="pf" step="0.01" min="0" max="1" placeholder="0.9" value="0.9">
+        <button onclick="calculate()">Calculate Phase Angle</button>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        function calculate() {
+            const pf = parseFloat(document.getElementById('pf').value);
+            if (pf < 0 || pf > 1) {
+                alert("Power factor must be between 0 and 1!");
+                return;
+            }
+            const theta = Math.acos(pf) * (180 / Math.PI);
+            const phi_IR = -(theta + 30); // Delta connection adjustment
+            document.getElementById('result').textContent = `Phase angle of I_R: ${phi_IR.toFixed(2)}°`;
+        }
+    </script>
 </body>
 </html>
