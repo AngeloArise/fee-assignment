@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3-Phase Reactance Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .calculator {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #34495e;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #eaf2f8;
+            border-radius: 5px;
+            display: none;
+        }
+        .result-item {
+            margin-bottom: 10px;
+        }
+        .result-value {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        .formula {
+            background-color: #f0f7fd;
+            padding: 10px;
+            border-left: 4px solid #3498db;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h1>3-Phase Reactance Calculator</h1>
+        
+        <div class="input-group">
+            <label for="lineVoltage">Line Voltage (V):</label>
+            <input type="number" id="lineVoltage" value="400">
+        </div>
+        
+        <div class="input-group">
+            <label for="phasePower">Phase Power (W):</label>
+            <input type="number" id="phasePower" value="4800">
+        </div>
+        
+        <div class="input-group">
+            <label for="lineCurrent">Line Current (A):</label>
+            <input type="number" id="lineCurrent" value="88">
+        </div>
+        
+        <button onclick="calculateReactance()">Calculate Reactance</button>
+        
+        <div class="formula">
+            <strong>Formulas Used:</strong><br>
+            V_ph = V_line/√3<br>
+            cosθ = P/(V_ph × I_ph)<br>
+            Z = V_ph/I_ph ∠θ<br>
+            X = |Z| × sinθ
+        </div>
+        
+        <div id="results" class="results">
+            <h3>Calculation Results</h3>
+            <div class="result-item">
+                Phase Voltage: <span class="result-value" id="vPhase"></span> V
+            </div>
+            <div class="result-item">
+                Power Factor Angle: <span class="result-value" id="theta"></span>°
+            </div>
+            <div class="result-item">
+                Impedance (Polar): <span class="result-value" id="impedance"></span> Ω
+            </div>
+            <div class="result-item">
+                <strong>Reactance (X):</strong> <span class="result-value" id="reactance"></span> Ω
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateReactance() {
+            // Get input values
+            const V_line = parseFloat(document.getElementById('lineVoltage').value);
+            const P = parseFloat(document.getElementById('phasePower').value);
+            const I_line = parseFloat(document.getElementById('lineCurrent').value);
+            
+            // Calculate phase voltage
+            const V_ph = V_line / Math.sqrt(3);
+            
+            // Calculate power factor angle
+            const cosθ = P / (V_ph * I_line);
+            const θ = Math.acos(cosθ) * (180/Math.PI);
+            
+            // Calculate impedance
+            const Z_mag = V_ph / I_line;
+            const Z_polar = Z_mag.toFixed(3) + " ∠" + θ.toFixed(2) + "°";
+            
+            // Calculate reactance
+            const X = Z_mag * Math.sin(θ * Math.PI/180);
+            
+            // Display results
+            document.getElementById('vPhase').textContent = V_ph.toFixed(2);
+            document.getElementById('theta').textContent = θ.toFixed(2);
+            document.getElementById('impedance').textContent = Z_polar;
+            document.getElementById('reactance').textContent = X.toFixed(2);
+            
+            // Show results
+            document.getElementById('results').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
