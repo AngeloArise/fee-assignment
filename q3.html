@@ -83,17 +83,17 @@
         
         <div class="input-group">
             <label for="lineVoltage">Line Voltage (V):</label>
-            <input type="number" id="lineVoltage" value="400">
+            <input type="number" id="lineVoltage" placeholder="Enter line voltage">
         </div>
         
         <div class="input-group">
             <label for="phasePower">Phase Power (W):</label>
-            <input type="number" id="phasePower" value="4800">
+            <input type="number" id="phasePower" placeholder="Enter phase power">
         </div>
         
         <div class="input-group">
             <label for="lineCurrent">Line Current (A):</label>
-            <input type="number" id="lineCurrent" value="88">
+            <input type="number" id="lineCurrent" placeholder="Enter line current">
         </div>
         
         <button onclick="calculateReactance()">Calculate Reactance</button>
@@ -126,13 +126,30 @@
     <script>
         function calculateReactance() {
             // Get input values
+            const V_line = parseFloat(document.getElementById('lineVoltage').value);
+            const P = parseFloat(document.getElementById('phasePower').value);
+            const I_line = parseFloat(document.getElementById('lineCurrent').value);
             
+            // Validate inputs
+            
+            if (isNaN(P)) {
+                alert("Please enter a valid phase power");
+                return;
+            }
+            if (isNaN(I_line)) {
+                alert("Please enter a valid line current");
+                return;
+            }
             
             // Calculate phase voltage
             const V_ph = V_line / Math.sqrt(3);
             
             // Calculate power factor angle
             const cosθ = P / (V_ph * I_line);
+            if (Math.abs(cosθ) > 1) {
+                alert("Invalid input combination: Power factor cannot be greater than 1");
+                return;
+            }
             const θ = Math.acos(cosθ) * (180/Math.PI);
             
             // Calculate impedance
