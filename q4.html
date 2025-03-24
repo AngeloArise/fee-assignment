@@ -82,40 +82,44 @@
         <h1>3-Phase Reactive Power Calculator</h1>
         
         <div class="input-group">
-            <label for="totalPower">Total Active Power (kW):</label>
-            <input type="number" id="totalPower" placeholder="Enter power in kW">
+            <label for="lineVoltage">Line Voltage (V):</label>
+            <input type="number" id="lineVoltage" value="400" placeholder="400 (default)">
         </div>
         
         <div class="input-group">
-            <label for="powerFactor">Power Factor (0 to 1):</label>
-            <input type="number" id="powerFactor" min="0" max="1" step="0.01" placeholder="Enter power factor">
+            <label for="phasePower">R-Phase Power (W):</label>
+            <input type="number" id="phasePower" value="4400" placeholder="Enter R-phase power">
+        </div>
+        
+        <div class="input-group">
+            <label for="lineCurrent">Y-Line Current (A):</label>
+            <input type="number" id="lineCurrent" value="64" placeholder="Enter Y-line current">
         </div>
         
         <button onclick="calculateReactivePower()">Calculate Reactive Power</button>
         
         <div class="formula">
             <strong>Formulas Used:</strong><br>
-            S = P / pf<br>
-            Q = √(S² - P²)<br>
-            Where:<br>
-            S = Apparent Power (kVA)<br>
-            P = Active Power (input)<br>
-            pf = Power Factor (input)
+            1. V_ph = V_line/√3<br>
+            2. P_3φ = 3 × P_1φ<br>
+            3. cosθ = P_1φ/(V_ph × I_ph)<br>
+            4. Q_3φ = P_3φ × tanθ<br>
+            (For balanced star-connected load)
         </div>
         
         <div id="results" class="results">
             <h3>Calculation Results</h3>
             <div class="result-item">
-                Total Active Power (P): <span class="result-value" id="activePower"></span>
+                Phase Voltage: <span class="result-value" id="vPhase"></span> V
             </div>
             <div class="result-item">
-                Power Factor: <span class="result-value" id="pfValue"></span>
+                Total 3-Phase Active Power: <span class="result-value" id="totalActivePower"></span> W
             </div>
             <div class="result-item">
-                Apparent Power (S): <span class="result-value" id="apparentPower"></span>
+                Power Factor Angle: <span class="result-value" id="theta"></span>°
             </div>
             <div class="result-item">
-                <strong>Total Reactive Power (Q):</strong> <span class="result-value" id="reactivePower"></span>
+                <strong>Total 3-Phase Reactive Power:</strong> <span class="result-value" id="reactivePower"></span> var
             </div>
         </div>
     </div>
@@ -123,33 +127,46 @@
     <script>
         function calculateReactivePower() {
             // Get input values
-            const P_kW = parseFloat(document.getElementById('totalPower').value);
-            const pf = parseFloat(document.getElementById('powerFactor').value);
+            const V_line = parseFloat(document.getElementById('lineVoltage').value);
+            const P_1phase = parseFloat(document.getElementById('phasePower').value);
+            const I_line = parseFloat(document.getElementById('lineCurrent').value);
             
             // Validate inputs
-            if (isNaN(P_kW) || P_kW <= 0) {
-                alert("Please enter a valid positive active power");
+            if (isNaN(V_line) || V_line <= 0) {
+                alert("Please enter a valid line voltage");
                 return;
             }
-            if (isNaN(pf) || pf <= 0 || pf > 1) {
-                alert("Please enter a valid power factor between 0 and 1");
+            if (isNaN(P_1phase) || P_1phase <= 0) {
+                alert("Please enter a valid phase power");
+                return;
+            }
+            if (isNaN(I_line) || I_line <= 0) {
+                alert("Please enter a valid line current");
                 return;
             }
             
-            // Convert kW to watts
-            const P = P_kW * 1000;
+            // Calculate phase voltage
+            const V_ph = V_line / Math.sqrt(3);
             
-            // Calculate apparent power
-            const S = P / pf;
+            // Calculate total 3-phase active power
+            const P_3phase = 3 * P_1phase;
             
-            // Calculate reactive power (convert to kVAR)
-            const Q = Math.sqrt(Math.pow(S, 2) - Math.pow(P, 2)) / 1000;
+            // Calculate power factor angle
+            const cosθ = P_1phase / (V_ph * I_line);
+            if (Math.abs(cosθ) > 1) {
+                alert("Invalid input combination: Power factor cannot be greater than 1");
+                return;
+            }
+            const θ = Math.acos(cosθ);
+            
+            // Calculate total 3-phase reactive power
+            const Q_3phase = P_3phase * Math.tan(θ);
             
             // Display results
-            document.getElementById('activePower').textContent = P_kW.toFixed(2) + ' kW';
-            document.getElementById('pfValue').textContent = pf.toFixed(2);
-            document.getElementById('apparentPower').textContent = (S/1000).toFixed(2) + ' kVA';
-            document.getElementById('reactivePower').textContent = Q.toFixed(2) + ' kVAR';
+            document.getElementById('vPhase').textContent = V_ph.toFixed(2);
+            document.getElementById('totalActivePower').textContent = P_3phase.toFixed(2);
+            document.getElementById('theta').textContent = (θ * 180/Math.PI).toFixed(2);
+            document.getElementById('reactivePower').textContent = Q_3phase.toFixed(4);
             
             // Show results
             document.getElementById('results').style.display = 'block';
