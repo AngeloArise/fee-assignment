@@ -3,9 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Delta-Star Power Ratio Calculator</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .calculator { background: #f9f9f9; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        input { width: 100%; padding: 8px; margin: 5px 0 15px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #007BFF; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; }
+        .result { font-weight: bold; color: #d9534f; margin-top: 10px; }
+    </style>
 </head>
 <body>
-    
+    <div class="calculator">
+        <h2>Delta-Star Power Ratio Calculator</h2>
+        <label for="voltage">Line Voltage (V):</label>
+        <input type="number" id="voltage">
+        <label for="resistance">Resistance (R) in Ω:</label>
+        <input type="number" id="resistance">
+        <label for="reactance">Reactance (X) in Ω:</label>
+        <input type="number" id="reactance">
+        <button onclick="calculate()">Calculate Ratio</button>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        function calculate() {
+            const V_L = parseFloat(document.getElementById('voltage').value);
+            const R = parseFloat(document.getElementById('resistance').value);
+            const X = parseFloat(document.getElementById('reactance').value);
+            const Z = Math.sqrt(R * R + X * X);
+
+            // Star configuration
+            const V_ph_Y = V_L / Math.sqrt(3);
+            const I_ph_Y = V_ph_Y / Z;
+            const P_Y = 3 * I_ph_Y * I_ph_Y * R;
+
+            // Delta configuration
+            const V_ph_Delta = V_L;
+            const I_ph_Delta = V_ph_Delta / Z;
+            const P_Delta = 3 * I_ph_Delta * I_ph_Delta * R;
+
+            const ratio = P_Delta / P_Y;
+            document.getElementById('result').innerHTML = `
+                <p>Star Power (P_Y): ${P_Y.toFixed(2)} W</p>
+                <p>Delta Power (P_Δ): ${P_Delta.toFixed(2)} W</p>
+                <p><strong>Ratio (P_Δ/P_Y): ${ratio.toFixed(4)}</strong></p>
+            `;
+        }
+    </script>
 </body>
 </html>
